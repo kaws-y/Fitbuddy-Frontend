@@ -1,0 +1,62 @@
+{
+  "pages": [
+    {
+      "path": "pages/welcome/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/auth/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/auth/register",
+      "style": {
+        "navigationBarTitleText": "注册",
+        "enablePullDownRefresh": false
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#3cc51f",
+    "borderStyle": "black",
+    "backgroundColor": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "iconPath": "static/tabBar/home.png",
+        "selectedIconPath": "static/tabBar/home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/training/plans",
+        "iconPath": "static/tabBar/training.png",
+        "selectedIconPath": "static/tabBar/training-active.png",
+        "text": "训练"
+      },
+      {
+        "pagePath": "pages/data/plans",
+        "iconPath": "static/tabBar/data.png",
+        "selectedIconPath": "static/tabBar/data-active.png",
+        "text": "数据"
+      },
+      {
+        "pagePath": "pages/user/profile",
+        "iconPath": "static/tabBar/user.png",
+        "selectedIconPath": "static/tabBar/user-active.png",
+        "text": "我的"
+      }
+    ]
+  }
+}
