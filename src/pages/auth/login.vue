@@ -4,7 +4,7 @@
       <!-- Header -->
       <view class="header">
         <text class="logo-text">FitBuddy Pro</text>
-        <text class="subtitle">欢迎回来</text>
+        <text class="subtitle">{{ isRegisterMode ? '创建新账户' : '欢迎回来' }}</text>
       </view>
       
       <view class="form">
@@ -18,7 +18,7 @@
             placeholder-class="input-placeholder"
             v-model="formData.username"
             :disabled="isLoading"
-            @confirm="handleLogin"
+            @confirm="handleSubmit"
           />
         </view>
         
@@ -26,7 +26,7 @@
         <view class="form-item">
           <view class="label-row">
             <text class="label">密码</text>
-            <text class="forgot-pwd" @click="handleForgotPassword">忘记密码?</text>
+            <text v-if="!isRegisterMode" class="forgot-pwd" @click="handleForgotPassword">忘记密码?</text>
           </view>
           <input 
             class="input-field" 
@@ -35,7 +35,21 @@
             placeholder-class="input-placeholder"
             v-model="formData.password"
             :disabled="isLoading"
-            @confirm="handleLogin"
+            @confirm="handleSubmit"
+          />
+        </view>
+        
+        <!-- Confirm Password (Register Mode) -->
+        <view v-if="isRegisterMode" class="form-item">
+          <text class="label">确认密码</text>
+          <input 
+            class="input-field" 
+            type="password" 
+            placeholder="请再次输入密码"
+            placeholder-class="input-placeholder"
+            v-model="formData.confirmPassword"
+            :disabled="isLoading"
+            @confirm="handleSubmit"
           />
         </view>
         
@@ -44,40 +58,24 @@
           <text class="error-text">{{ validationError }}</text>
         </view>
         
-        <!-- Login Button -->
+        <!-- Submit Button -->
         <button 
           class="btn-login" 
-          @click="handleLogin"
+          @click="handleSubmit"
           :disabled="isLoading"
           :loading="isLoading"
         >
-          {{ isLoading ? '登录中...' : '登录' }}
+          {{ isLoading ? (isRegisterMode ? '注册中...' : '登录中...') : (isRegisterMode ? '注册' : '登录') }}
         </button>
         
         <!-- Divider -->
-        <view class="divider">
-          <view class="line"></view>
-          <text class="divider-text">或</text>
-          <view class="line"></view>
-        </view>
         
         <!-- Social Login -->
-        <view class="social-login">
-          <button class="btn-social" @click="handleSocialLogin('wechat')">
-            <text class="social-text">使用微信登录</text>
-          </button>
-          <button class="btn-social" @click="handleSocialLogin('apple')">
-            <text class="social-text">使用Apple登录</text>
-          </button>
-          <button class="btn-social" @click="handleSocialLogin('google')">
-            <text class="social-text">使用Google登录</text>
-          </button>
-        </view>
         
-        <!-- Register Link -->
+        <!-- Toggle Link -->
         <view class="register-link">
-          <text class="no-account">还没有账户? </text>
-          <text class="link-text" @click="goToRegister">立即注册</text>
+          <text class="no-account">{{ isRegisterMode ? '已有账户? ' : '还没有账户? ' }}</text>
+          <text class="link-text" @click="toggleMode">{{ isRegisterMode ? '立即登录' : '立即注册' }}</text>
         </view>
       </view>
     </view>
@@ -94,16 +92,30 @@ import { ref, reactive } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 
 // 使用 useAuth composable
-const { login, isLoading, pageType } = useAuth()
+const { login, register, isLoading } = useAuth()
+
+// 页面模式：登录/注册
+const isRegisterMode = ref(false)
 
 // 表单数据
 const formData = reactive({
   username: '',
-  password: ''
+  password: '',
+  confirmPassword: ''
 })
 
 // 验证错误信息
 const validationError = ref('')
+
+/**
+ * 切换登录/注册模式
+ */
+const toggleMode = () => {
+  isRegisterMode.value = !isRegisterMode.value
+  validationError.value = ''
+  formData.password = ''
+  formData.confirmPassword = ''
+}
 
 /**
  * 表单验证
@@ -111,14 +123,16 @@ const validationError = ref('')
 const validateForm = (): boolean => {
   validationError.value = ''
   
-  // 验证用户名
+  // 验证邮箱
   if (!formData.username || formData.username.trim() === '') {
-    validationError.value = '请输入用户名或邮箱'
+    validationError.value = '请输入邮箱'
     return false
   }
   
-  if (formData.username.length < 3) {
-    validationError.value = '用户名至少3个字符'
+  // 简单邮箱格式验证
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(formData.username.trim())) {
+    validationError.value = '请输入有效的邮箱地址'
     return false
   }
   
@@ -133,14 +147,26 @@ const validateForm = (): boolean => {
     return false
   }
   
+  // 注册模式下验证确认密码
+  if (isRegisterMode.value) {
+    if (!formData.confirmPassword || formData.confirmPassword.trim() === '') {
+      validationError.value = '请确认密码'
+      return false
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      validationError.value = '两次输入的密码不一致'
+      return false
+    }
+  }
+  
   return true
 }
 
 /**
- * 处理登录
+ * 处理提交（登录/注册）
  */
-const handleLogin = async () => {
-  // 表单验证
+const handleSubmit = async () => {
   if (!validateForm()) {
     uni.showToast({
       title: validationError.value,
@@ -151,11 +177,17 @@ const handleLogin = async () => {
   }
   
   try {
-    // 调用登录方法
-    const success = await login(formData.username.trim(), formData.password)
+    let success: boolean
+    
+    if (isRegisterMode.value) {
+      // 注册
+      success = await register(formData.username.trim(), formData.password)
+    } else {
+      // 登录
+      success = await login(formData.username.trim(), formData.password)
+    }
     
     if (success) {
-      // 登录成功，跳转到首页
       setTimeout(() => {
         uni.reLaunch({
           url: '/pages/index/index'
@@ -163,8 +195,7 @@ const handleLogin = async () => {
       }, 1500)
     }
   } catch (err: any) {
-    // 错误已在 useAuth 中处理
-    console.error('Login error:', err)
+    console.error(isRegisterMode.value ? 'Register error:' : 'Login error:', err)
   }
 }
 
@@ -182,17 +213,11 @@ const handleForgotPassword = () => {
  * 社交登录
  */
 const handleSocialLogin = (provider: string) => {
+  const action = isRegisterMode.value ? '注册' : '登录'
   uni.showToast({
-    title: `${provider} 登录开发中`,
+    title: `${provider} ${action}开发中`,
     icon: 'none'
   })
-}
-
-/**
- * 跳转到注册页
- */
-const goToRegister = () => {
-  this.pageType = 'register'
 }
 </script>
 

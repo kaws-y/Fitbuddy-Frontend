@@ -24,6 +24,24 @@
         "navigationBarTitleText": "注册",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pages/user/profile",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/training/plans",
+     "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/progress/tracking",
+     "style": {
+        "navigationStyle": "custom"
+      }
     }
   ],
   "tabBar": {
@@ -45,7 +63,7 @@
         "text": "训练"
       },
       {
-        "pagePath": "pages/data/plans",
+        "pagePath": "pages/progress/tracking",
         "iconPath": "static/tabBar/data.png",
         "selectedIconPath": "static/tabBar/data-active.png",
         "text": "数据"
