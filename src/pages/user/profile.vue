@@ -248,7 +248,7 @@
   display: flex;
   align-items: center;
   background-color: #111111;
-  border: 1rpx solid #1a1a1a;
+  border: 1rpx solid #414040ff;
   border-radius: 20rpx;
   padding: 28rpx 24rpx;
   margin-bottom: 20rpx;
@@ -304,7 +304,7 @@
 
 .section-title {
   font-size: 28rpx;
-  color: #666666;
+  color: #fff;
   margin-bottom: 24rpx;
   display: block;
 }
@@ -323,14 +323,15 @@
   font-size: 32rpx;
   margin-right: 24rpx;
   width: 40rpx;
+  color: #fff;
 }
 
 .more-text {
   font-size: 28rpx;
-  color: #888888;
+  color: #fff;
 }
 
 .more-item.logout .more-text {
-  color: #00ff88;
+  color: #fff;
 }
 </style>
